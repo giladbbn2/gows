@@ -40,7 +40,6 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 func (ws *WebServer) ListenAndServe() error {
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
-
 	if err != nil {
 		return err
 	}

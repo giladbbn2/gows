@@ -82,7 +82,7 @@ func (mysql *Mysql) GetConnection(conn string) (*sql.DB, error) {
 
 }
 
-func (mysql *Mysql) Query(conn string, sql string) ([][]interface{}, error) {
+func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]interface{}, error) {
 
 	var resultsAll = make([][]interface{}, 0)
 
@@ -91,7 +91,7 @@ func (mysql *Mysql) Query(conn string, sql string) ([][]interface{}, error) {
 		return nil, err
 	}
 
-	rows, err := db.Query(sql)
+	rows, err := db.Query(sql, args...)
 	if err != nil {
 		return nil, err
 	}
