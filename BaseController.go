@@ -4,14 +4,20 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 type BaseController struct {
-	MicroServiceRootDir string
-	TemplateDir         string
-	Request             *http.Request
-	Response            http.ResponseWriter
+	ws       *WebServer
+	Request  *http.Request
+	Response http.ResponseWriter
+}
+
+func (ctrl *BaseController) SetWebServer(ws *WebServer) {
+	ctrl.ws = ws
+}
+
+func (ctrl *BaseController) GetWebServer() *WebServer {
+	return ctrl.ws
 }
 
 func (ctrl *BaseController) SetRequest(r *http.Request) {
@@ -22,14 +28,13 @@ func (ctrl *BaseController) SetResponse(w http.ResponseWriter) {
 	ctrl.Response = w
 }
 
-func (ctrl *BaseController) SetDirs() {
-	ctrl.MicroServiceRootDir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	ctrl.TemplateDir = ctrl.MicroServiceRootDir + string(os.PathSeparator) + "tpl"
+func (ctrl *BaseController) GetResponse() *http.ResponseWriter {
+	return &ctrl.Response
 }
 
 func (ctrl *BaseController) GetTemplate(tpl string) ([]byte, error) {
 
-	contents, err := ioutil.ReadFile(ctrl.TemplateDir + string(os.PathSeparator) + tpl)
+	contents, err := ioutil.ReadFile(templateDir + string(os.PathSeparator) + tpl)
 
 	if err != nil {
 		return nil, err
@@ -37,4 +42,12 @@ func (ctrl *BaseController) GetTemplate(tpl string) ([]byte, error) {
 
 	return contents, nil
 
+}
+
+func (ctrl *BaseController) GetMicroServiceRootDir() string {
+	return microServiceRootDir
+}
+
+func (ctrl *BaseController) GetTemplateDir() string {
+	return templateDir
 }

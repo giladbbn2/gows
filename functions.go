@@ -1,11 +1,27 @@
 package gows
 
 import (
-	"errors"
+	"io"
 	"net/http"
-	"reflect"
+	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 )
+
+var (
+	microServiceRootDir string
+	templateDir         string
+	serveMuxHandler     *http.ServeMux
+	serveMuxHandlerOnce sync.Once
+	mysqlConnections    map[string]*MysqlConnConfig
+)
+
+func init() {
+	microServiceRootDir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
+	templateDir = microServiceRootDir + string(os.PathSeparator) + "tpl"
+	mysqlConnections = make(map[string]*MysqlConnConfig)
+}
 
 func Sanitize(str string) string {
 
@@ -25,38 +41,18 @@ func Sanitize(str string) string {
 
 }
 
-func HTTPCallCtrlMethod(ctrl BaseControllerInterface, w http.ResponseWriter, r *http.Request) error {
+func JSON(w http.ResponseWriter, str string) {
 
-	urlElements := strings.Split(r.RequestURI, "/")
+	w.Header().Set("Content-Type", "application/json")
 
-	numElements := len(urlElements)
+	io.WriteString(w, `{"code":200,"value":"`+str+`"}`)
 
-	var args []string
+}
 
-	if numElements > 4 {
-		args = urlElements[5:]
-	} else if numElements == 4 {
-		args = make([]string, 0)
-	} else {
-		return errors.New("invalid number of params")
-	}
+func JSONError(w http.ResponseWriter, err error) {
 
-	methodName := strings.Title(urlElements[4])
+	w.Header().Set("Content-Type", "application/json")
 
-	ctrl.SetDirs()
-	ctrl.SetRequest(r)
-	ctrl.SetResponse(w)
-
-	method := reflect.ValueOf(ctrl).MethodByName(methodName)
-
-	if !method.IsValid() {
-		return errors.New("method not found")
-	}
-
-	callable := method.Interface().(func([]string))
-
-	callable(args)
-
-	return nil
+	io.WriteString(w, `{"code":500,"value":"`+err.Error()+`"}`)
 
 }
