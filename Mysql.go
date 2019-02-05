@@ -38,6 +38,24 @@ func (mysql *Mysql) OpenConnection(conn string) (*sql.DB, error) {
 
 }
 
+func (mysql *Mysql) CloseConnection(conn string) {
+
+	mysqldb, ok := mysqlConnections[conn]
+	if !ok {
+		return
+	}
+
+	if mysqldb.DB == nil {
+		return
+	}
+
+	err := mysqldb.DB.Close()
+	if err != nil {
+		return
+	}
+
+}
+
 func (mysql *Mysql) AddAndOpenConnection(conn string, host string, user string, pass string, dbname string, port string) (*sql.DB, error) {
 
 	mysql.AddConnection(conn, host, user, pass, dbname, port)
