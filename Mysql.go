@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"strconv"
+	"time"
 )
 
 type Mysql struct{}
@@ -148,4 +149,9 @@ func (mysql *Mysql) ToString(mysqlResultVal interface{}) (string, error) {
 
 func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, error) {
 	return strconv.Atoi(string((*(mysqlResultVal.(*interface{}))).([]byte)))
+}
+
+func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, error) {
+	a := string((*(mysqlResultVal.(*interface{}))).([]byte))
+	return time.Parse(time.RFC3339, a[:10]+"T"+a[11:]+"Z")
 }
