@@ -140,18 +140,55 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]int
 }
 
 func (mysql *Mysql) ToByteSlice(mysqlResultVal interface{}) ([]byte, error) {
-	return (*(mysqlResultVal.(*interface{}))).([]byte), nil
+
+	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
+	if !ok || b == nil {
+		return nil, errors.New("cant assert to []byte")
+	}
+
+	return b, nil
+
 }
 
 func (mysql *Mysql) ToString(mysqlResultVal interface{}) (string, error) {
-	return string((*(mysqlResultVal.(*interface{}))).([]byte)), nil
+
+	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
+	if !ok || b == nil {
+		return "", errors.New("cant assert to string")
+	}
+
+	s := string(b)
+
+	return s, nil
+
 }
 
 func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, error) {
-	return strconv.Atoi(string((*(mysqlResultVal.(*interface{}))).([]byte)))
+
+	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
+	if !ok || b == nil {
+		return 0, errors.New("cant assert to int")
+	}
+
+	s := string(b)
+
+	return strconv.Atoi(s)
+
 }
 
 func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, error) {
-	a := string((*(mysqlResultVal.(*interface{}))).([]byte))
-	return time.Parse(time.RFC3339, a[:10]+"T"+a[11:]+"Z")
+
+	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
+	if !ok || b == nil {
+		return time.Unix(0, 0), errors.New("cant assert to Time")
+	}
+
+	s := string(b)
+
+	if len(s) < 19 {
+		return time.Unix(0, 0), errors.New("cant assert to Time")
+	}
+
+	return time.Parse(time.RFC3339, s[:10]+"T"+s[11:]+"Z")
+
 }
