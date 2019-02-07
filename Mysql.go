@@ -83,9 +83,9 @@ func (mysql *Mysql) GetConnection(conn string) (*sql.DB, error) {
 
 }
 
-func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][][]interface{}, error) {
+func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]interface{}, error) {
 
-	var resultSets = make([][][]interface{}, 0)
+	resultSet := make([][]interface{}, 0)
 
 	db, err := mysql.GetConnection(conn)
 	if err != nil {
@@ -98,21 +98,7 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][][]i
 	}
 	defer rows.Close()
 
-	var resultSetId = 0
-
 	for true {
-
-		resultSet := make([][]interface{}, 0)
-
-		if resultSetId > 0 {
-
-			// allow branch prediction more easily
-
-			if !rows.NextResultSet() {
-				break
-			}
-
-		}
 
 		cols, _ := rows.Columns()
 		numCols := len(cols)
@@ -133,13 +119,9 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][][]i
 
 		}
 
-		resultSets[resultSetId] = resultSet
-
-		resultSetId++
-
 	}
 
-	return resultSets, nil
+	return resultSet, nil
 
 }
 
