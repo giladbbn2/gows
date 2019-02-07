@@ -187,9 +187,230 @@ func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, bool, error) {
 
 	s := string(by)
 
+	// Atoi can be faster than ParseInt
 	in, err := strconv.Atoi(s)
 
 	return in, false, err
+
+}
+
+func (mysql *Mysql) ToInt8(mysqlResultVal interface{}) (int8, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseInt(s, 10, 8)
+
+	return int8(in), false, err
+
+}
+
+func (mysql *Mysql) ToInt16(mysqlResultVal interface{}) (int16, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseInt(s, 10, 16)
+
+	return int16(in), false, err
+
+}
+
+func (mysql *Mysql) ToInt32(mysqlResultVal interface{}) (int32, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseInt(s, 10, 32)
+
+	return int32(in), false, err
+
+}
+
+func (mysql *Mysql) ToInt64(mysqlResultVal interface{}) (int64, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseInt(s, 10, 64)
+
+	return in, false, err
+
+}
+
+func (mysql *Mysql) ToUint(mysqlResultVal interface{}) (uint, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseUint(s, 10, 0)
+
+	return uint(in), false, err
+
+}
+
+func (mysql *Mysql) ToUint8(mysqlResultVal interface{}) (uint8, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseUint(s, 10, 8)
+
+	return uint8(in), false, err
+
+}
+
+func (mysql *Mysql) ToUint16(mysqlResultVal interface{}) (uint16, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseUint(s, 10, 16)
+
+	return uint16(in), false, err
+
+}
+
+func (mysql *Mysql) ToUint32(mysqlResultVal interface{}) (uint32, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseUint(s, 10, 32)
+
+	return uint32(in), false, err
+
+}
+
+func (mysql *Mysql) ToUint64(mysqlResultVal interface{}) (uint64, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	in, err := strconv.ParseUint(s, 10, 64)
+
+	return in, false, err
+
+}
+
+func (mysql *Mysql) ToFloat32(mysqlResultVal interface{}) (float32, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	fl, err := strconv.ParseFloat(s, 32)
+
+	return float32(fl), false, err
+
+}
+
+func (mysql *Mysql) ToFloat64(mysqlResultVal interface{}) (float64, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
+
+	fl, err := strconv.ParseFloat(s, 64)
+
+	return fl, false, err
 
 }
 
