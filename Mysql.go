@@ -98,26 +98,22 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]int
 	}
 	defer rows.Close()
 
-	for true {
+	cols, _ := rows.Columns()
+	numCols := len(cols)
 
-		cols, _ := rows.Columns()
-		numCols := len(cols)
+	for rows.Next() {
 
-		for rows.Next() {
-
-			results := make([]interface{}, numCols)
-			for j := 0; j < numCols; j++ {
-				var tmp interface{}
-				results[j] = &tmp
-			}
-
-			if err := rows.Scan(results...); err != nil {
-				return nil, err
-			}
-
-			resultSet = append(resultSet, results)
-
+		results := make([]interface{}, numCols)
+		for j := 0; j < numCols; j++ {
+			var tmp interface{}
+			results[j] = &tmp
 		}
+
+		if err := rows.Scan(results...); err != nil {
+			return nil, err
+		}
+
+		resultSet = append(resultSet, results)
 
 	}
 
