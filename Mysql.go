@@ -139,56 +139,80 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]int
 
 }
 
-func (mysql *Mysql) ToByteSlice(mysqlResultVal interface{}) ([]byte, error) {
+func (mysql *Mysql) ToByteSlice(mysqlResultVal interface{}) ([]byte, bool, error) {
 
-	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
-	if !ok || b == nil {
-		return nil, errors.New("cant assert to []byte")
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return nil, true, nil
 	}
 
-	return b, nil
+	by, ok := i.([]byte)
+	if !ok {
+		return nil, false, errors.New("cant assert to []byte")
+	}
+
+	return by, false, nil
 
 }
 
-func (mysql *Mysql) ToString(mysqlResultVal interface{}) (string, error) {
+func (mysql *Mysql) ToString(mysqlResultVal interface{}) (string, bool, error) {
 
-	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
-	if !ok || b == nil {
-		return "", errors.New("cant assert to string")
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return "", true, nil
 	}
 
-	s := string(b)
+	by, ok := i.([]byte)
+	if !ok {
+		return "", false, errors.New("cant assert to string")
+	}
 
-	return s, nil
+	s := string(by)
+
+	return s, false, nil
 
 }
 
-func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, error) {
+func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, bool, error) {
 
-	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
-	if !ok || b == nil {
-		return 0, errors.New("cant assert to int")
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return 0, true, nil
 	}
 
-	s := string(b)
+	by, ok := i.([]byte)
+	if !ok {
+		return 0, false, errors.New("cant assert to int")
+	}
 
-	return strconv.Atoi(s)
+	s := string(by)
+
+	in, err := strconv.Atoi(s)
+
+	return in, false, err
 
 }
 
-func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, error) {
+func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, bool, error) {
 
-	b, ok := (*(mysqlResultVal.(*interface{}))).([]byte)
-	if !ok || b == nil {
-		return time.Unix(0, 0), errors.New("cant assert to Time")
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return time.Unix(0, 0), true, nil
 	}
 
-	s := string(b)
+	by, ok := i.([]byte)
+	if !ok {
+		return time.Unix(0, 0), false, errors.New("cant assert to int")
+	}
+
+	s := string(by)
 
 	if len(s) < 19 {
-		return time.Unix(0, 0), errors.New("cant assert to Time")
+		return time.Unix(0, 0), false, errors.New("cant assert to Time")
 	}
 
-	return time.Parse(time.RFC3339, s[:10]+"T"+s[11:]+"Z")
+	t, err := time.Parse(time.RFC3339, s[:10]+"T"+s[11:]+"Z")
+
+	return t, false, err
 
 }
