@@ -83,9 +83,9 @@ func (mysql *Mysql) GetConnection(conn string) (*sql.DB, error) {
 
 }
 
-func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]interface{}, error) {
+func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][][]interface{}, error) {
 
-	var resultsAll = make([][]interface{}, 0)
+	var resultSets = make([][][]interface{}, 0)
 
 	db, err := mysql.GetConnection(conn)
 	if err != nil {
@@ -101,6 +101,8 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]int
 	var resultSetId = 0
 
 	for true {
+
+		resultSet := make([][]interface{}, 0)
 
 		if resultSetId > 0 {
 
@@ -127,15 +129,17 @@ func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]int
 				return nil, err
 			}
 
-			resultsAll = append(resultsAll, results)
+			resultSet = append(resultSet, results)
 
 		}
+
+		resultSets[resultSetId] = resultSet
 
 		resultSetId++
 
 	}
 
-	return resultsAll, nil
+	return resultSets, nil
 
 }
 
