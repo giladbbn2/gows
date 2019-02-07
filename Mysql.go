@@ -148,10 +148,26 @@ func (mysql *Mysql) ToByteSlice(mysqlResultVal interface{}) ([]byte, bool, error
 
 	by, ok := i.([]byte)
 	if !ok {
-		return nil, false, errors.New("cant assert to []byte")
+		return nil, false, errors.New("can't convert to []byte")
 	}
 
 	return by, false, nil
+
+}
+
+func (mysql *Mysql) ToBool(mysqlResultVal interface{}) (bool, bool, error) {
+
+	i := (*(mysqlResultVal.(*interface{})))
+	if i == nil {
+		return false, true, nil
+	}
+
+	by, ok := i.([]byte)
+	if !ok || len(by) == 0 {
+		return false, false, errors.New("can't convert to bool")
+	}
+
+	return by[0] == 1, false, nil
 
 }
 
@@ -164,7 +180,7 @@ func (mysql *Mysql) ToString(mysqlResultVal interface{}) (string, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return "", false, errors.New("cant assert to string")
+		return "", false, errors.New("can't convert to string")
 	}
 
 	s := string(by)
@@ -182,7 +198,7 @@ func (mysql *Mysql) ToInt(mysqlResultVal interface{}) (int, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to int")
 	}
 
 	s := string(by)
@@ -203,7 +219,7 @@ func (mysql *Mysql) ToInt8(mysqlResultVal interface{}) (int8, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to int8")
 	}
 
 	s := string(by)
@@ -223,7 +239,7 @@ func (mysql *Mysql) ToInt16(mysqlResultVal interface{}) (int16, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to int16")
 	}
 
 	s := string(by)
@@ -243,7 +259,7 @@ func (mysql *Mysql) ToInt32(mysqlResultVal interface{}) (int32, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to int32")
 	}
 
 	s := string(by)
@@ -263,7 +279,7 @@ func (mysql *Mysql) ToInt64(mysqlResultVal interface{}) (int64, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to int64")
 	}
 
 	s := string(by)
@@ -283,7 +299,7 @@ func (mysql *Mysql) ToUint(mysqlResultVal interface{}) (uint, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to uint")
 	}
 
 	s := string(by)
@@ -303,7 +319,7 @@ func (mysql *Mysql) ToUint8(mysqlResultVal interface{}) (uint8, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to uint8")
 	}
 
 	s := string(by)
@@ -323,7 +339,7 @@ func (mysql *Mysql) ToUint16(mysqlResultVal interface{}) (uint16, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to uint16")
 	}
 
 	s := string(by)
@@ -343,7 +359,7 @@ func (mysql *Mysql) ToUint32(mysqlResultVal interface{}) (uint32, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to uint32")
 	}
 
 	s := string(by)
@@ -363,7 +379,7 @@ func (mysql *Mysql) ToUint64(mysqlResultVal interface{}) (uint64, bool, error) {
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to uint64")
 	}
 
 	s := string(by)
@@ -383,7 +399,7 @@ func (mysql *Mysql) ToFloat32(mysqlResultVal interface{}) (float32, bool, error)
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to float32")
 	}
 
 	s := string(by)
@@ -403,7 +419,7 @@ func (mysql *Mysql) ToFloat64(mysqlResultVal interface{}) (float64, bool, error)
 
 	by, ok := i.([]byte)
 	if !ok {
-		return 0, false, errors.New("cant assert to int")
+		return 0, false, errors.New("can't convert to float64")
 	}
 
 	s := string(by)
@@ -423,13 +439,13 @@ func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, bool, error) 
 
 	by, ok := i.([]byte)
 	if !ok {
-		return time.Unix(0, 0), false, errors.New("cant assert to int")
+		return time.Unix(0, 0), false, errors.New("can't convert to int")
 	}
 
 	s := string(by)
 
 	if len(s) < 19 {
-		return time.Unix(0, 0), false, errors.New("cant assert to Time")
+		return time.Unix(0, 0), false, errors.New("can't convert to Time")
 	}
 
 	t, err := time.Parse(time.RFC3339, s[:10]+"T"+s[11:]+"Z")
