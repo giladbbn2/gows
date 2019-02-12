@@ -60,6 +60,28 @@ func JSONError(w http.ResponseWriter, err error) {
 
 }
 
+func Gzip(b []byte) ([]byte, error) {
+
+	if b == nil {
+		return nil, nil
+	}
+
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+
+	_, err := zw.Write(b)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+
+}
+
 func Gunzip(b []byte) ([]byte, error) {
 
 	if b == nil {
