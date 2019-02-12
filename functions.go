@@ -1,7 +1,10 @@
 package gows
 
 import (
+	"bytes"
+	"compress/gzip"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -54,5 +57,31 @@ func JSONError(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
 	io.WriteString(w, `{"code":500,"value":"`+err.Error()+`"}`)
+
+}
+
+func Gunzip(b []byte) ([]byte, error) {
+
+	if b == nil {
+		return nil, nil
+	}
+
+	buf := bytes.NewBuffer(b)
+
+	zr, err := gzip.NewReader(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	b2, err := ioutil.ReadAll(zr)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := zr.Close(); err != nil {
+		return nil, err
+	}
+
+	return b2, nil
 
 }
