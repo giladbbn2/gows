@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -83,42 +84,75 @@ func (mysql *Mysql) GetConnection(conn string) (*sql.DB, error) {
 
 }
 
-func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]interface{}, error) {
+func (mysql *Mysql) Query(conn string, sql string, args ...interface{}) ([][]interface{}, int, error) {
 
-	resultSet := make([][]interface{}, 0)
+	if conn == "" || sql == "" {
+		return nil, 0, nil
+	}
 
 	db, err := mysql.GetConnection(conn)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	rows, err := db.Query(sql, args...)
+	if sql[0] == " "[0] {
+		sql = strings.TrimLeft(sql, " ")
+	}
+
+	if len(sql) < 3 {
+		return nil, 0, nil
+	}
+
+	if strings.ToLower(sql[:3]) == "sel" {
+
+		resultSet := make([][]interface{}, 0)
+
+		rows, err := db.Query(sql, args...)
+		if err != nil {
+			return nil, 0, err
+		}
+		defer rows.Close()
+
+		cols, _ := rows.Columns()
+		numCols := len(cols)
+
+		for rows.Next() {
+
+			results := make([]interface{}, numCols)
+			for j := 0; j < numCols; j++ {
+				var tmp interface{}
+				results[j] = &tmp
+			}
+
+			if err := rows.Scan(results...); err != nil {
+				return nil, 0, err
+			}
+
+			resultSet = append(resultSet, results)
+
+		}
+
+		return resultSet, len(resultSet), nil
+
+	}
+
+	res, err := db.Exec(sql, args...)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	cols, _ := rows.Columns()
-	numCols := len(cols)
-
-	for rows.Next() {
-
-		results := make([]interface{}, numCols)
-		for j := 0; j < numCols; j++ {
-			var tmp interface{}
-			results[j] = &tmp
-		}
-
-		if err := rows.Scan(results...); err != nil {
-			return nil, err
-		}
-
-		resultSet = append(resultSet, results)
-
+		return nil, 0, err
 	}
 
-	return resultSet, nil
+	count, err := res.RowsAffected()
+	if err != nil {
+		return nil, 0, err
+	}
 
+	return nil, int(count), nil
+
+}
+
+func (mysql *Mysql) Exec(conn string, sql string, args ...interface{}) (int, error) {
+	_, count, err := mysql.Query(conn, sql, args...)
+	return count, err
 }
 
 func (mysql *Mysql) ToByteSlice(mysqlResultVal interface{}) ([]byte, bool, error) {
@@ -421,7 +455,7 @@ func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, bool, error) 
 
 	by, ok := i.([]byte)
 	if !ok {
-		return time.Unix(0, 0), false, errors.New("can't convert to int")
+		return time.Unix(0, 0), false, errors.New("can't convert to Time")
 	}
 
 	s := string(by)
@@ -430,6 +464,7 @@ func (mysql *Mysql) ToTime(mysqlResultVal interface{}) (time.Time, bool, error) 
 		return time.Unix(0, 0), false, errors.New("can't convert to Time")
 	}
 
+	// effectively make it UTC
 	t, err := time.Parse(time.RFC3339, s[:10]+"T"+s[11:]+"Z")
 
 	return t, false, err

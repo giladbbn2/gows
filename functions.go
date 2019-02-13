@@ -28,6 +28,10 @@ func init() {
 
 func Sanitize(str string) string {
 
+	if str == "" {
+		return ""
+	}
+
 	r := strings.NewReplacer(
 		"\"", "",
 		"'", "",
