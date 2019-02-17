@@ -52,7 +52,7 @@ func JSON(w http.ResponseWriter, str string) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	io.WriteString(w, `{"code":200,"value":"`+str+`"}`)
+	io.WriteString(w, `{"code":200,"value":`+str+`}`)
 
 }
 
