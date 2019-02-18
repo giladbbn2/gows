@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"os"
 	"reflect"
 	"strings"
 )
@@ -22,6 +21,9 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 	mux := http.NewServeMux()
 
+	fs := http.FileServer(http.Dir("includes")) //ws.GetMicroServiceRootDir() + string(os.PathSeparator) +
+	mux.Handle("/includes", fs)
+
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 
 		io.WriteString(w, "pong")
@@ -37,9 +39,6 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 }
 
 func (ws *WebServer) ListenAndServe() error {
-
-	fs := http.FileServer(http.Dir(ws.GetMicroServiceRootDir() + string(os.PathSeparator) + "includes"))
-	ws.mux.Handle("/includes", fs)
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
 	if err != nil {
