@@ -32,9 +32,9 @@ func (ctrl *BaseController) GetResponse() *http.ResponseWriter {
 	return &ctrl.Response
 }
 
-func (ctrl *BaseController) GetTemplate(tpl string) ([]byte, error) {
+func (ctrl *BaseController) GetTemplate(tplFilename string) ([]byte, error) {
 
-	contents, err := ioutil.ReadFile(templateDir + string(os.PathSeparator) + tpl)
+	contents, err := ioutil.ReadFile(templateDir + string(os.PathSeparator) + tplFilename)
 
 	if err != nil {
 		return nil, err
