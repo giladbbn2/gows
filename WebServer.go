@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type WebServer struct {
