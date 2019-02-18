@@ -102,7 +102,3 @@ func (ws *WebServer) invokeCtrlMethod(ctrl BaseControllerInterface, w http.Respo
 func (ws *WebServer) GetMicroServiceRootDir() string {
 	return microServiceRootDir
 }
-
-func (ws *WebServer) GetTemplateDir() string {
-	return templateDir
-}

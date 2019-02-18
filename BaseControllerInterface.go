@@ -9,11 +9,8 @@ type BaseControllerInterface interface {
 	GetWebServer() *WebServer
 
 	GetMicroServiceRootDir() string
-	GetTemplateDir() string
 
 	SetRequest(r *http.Request)
 	SetResponse(w http.ResponseWriter)
 	GetResponse() *http.ResponseWriter
-
-	GetTemplate(tpl string) ([]byte, error)
 }

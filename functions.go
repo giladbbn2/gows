@@ -14,15 +14,13 @@ import (
 
 var (
 	microServiceRootDir string
-	templateDir         string
 	serveMuxHandler     *http.ServeMux
 	serveMuxHandlerOnce sync.Once
 	mysqlConnections    map[string]*MysqlConnConfig
 )
 
 func init() {
-	microServiceRootDir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	templateDir = microServiceRootDir + string(os.PathSeparator) + "tpl"
+	microServiceRootDir, _ = filepath.Abs(filepath.Dir(os.Args[0])) //string(os.PathSeparator)
 	mysqlConnections = make(map[string]*MysqlConnConfig)
 }
 
