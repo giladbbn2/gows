@@ -39,7 +39,7 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 func (ws *WebServer) ListenAndServe() error {
 
 	fs := http.FileServer(http.Dir(ws.GetMicroServiceRootDir() + string(os.PathSeparator) + "includes"))
-	http.Handle("/includes", fs)
+	ws.mux.Handle("/includes", fs)
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
 	if err != nil {
