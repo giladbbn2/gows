@@ -21,23 +21,6 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 	mux := http.NewServeMux()
 
-	//fs := http.FileServer(http.Dir("includes/js")) //ws.GetMicroServiceRootDir() + string(os.PathSeparator) +
-	/*
-		mux.HandleFunc("/includes/js", func(w http.ResponseWriter, r *http.Request) {
-			fs.ServeHTTP(w, r)
-		})
-	*/
-	/*
-		mux.HandleFunc("/includes/", func(w http.ResponseWriter, r *http.Request) {
-
-			//fs := http.FileServer(http.Dir("includes/js"))
-			fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
-			fs.ServeHTTP(w, r)
-
-			//io.WriteString(w, "pong2")
-		})
-	*/
-
 	fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
 	mux.Handle("/includes/", fs)
 
