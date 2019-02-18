@@ -22,12 +22,12 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 	mux := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("includes")) //ws.GetMicroServiceRootDir() + string(os.PathSeparator) +
-	mux.Handle("/includes", fs)
+	mux.HandleFunc("/includes", func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	})
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-
 		io.WriteString(w, "pong")
-
 	})
 
 	ws := new(WebServer)
