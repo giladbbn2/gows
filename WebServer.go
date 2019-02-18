@@ -27,14 +27,19 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 			fs.ServeHTTP(w, r)
 		})
 	*/
-	mux.HandleFunc("/includes/js/", func(w http.ResponseWriter, r *http.Request) {
+	/*
+		mux.HandleFunc("/includes/", func(w http.ResponseWriter, r *http.Request) {
 
-		//fs := http.FileServer(http.Dir("includes/js"))
-		fs := http.StripPrefix("/includes/js", http.FileServer(http.Dir("./includes/js")))
-		fs.ServeHTTP(w, r)
+			//fs := http.FileServer(http.Dir("includes/js"))
+			fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
+			fs.ServeHTTP(w, r)
 
-		//io.WriteString(w, "pong2")
-	})
+			//io.WriteString(w, "pong2")
+		})
+	*/
+
+	fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
+	mux.Handle("/includes/", fs)
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "pong")
