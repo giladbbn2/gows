@@ -36,6 +36,12 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 }
 
+func (ws *WebServer) HandleFunc(pattern string, handler func(w http.ResponseWriter, r *http.Request)) {
+
+	ws.mux.HandleFunc(pattern, handler)
+
+}
+
 func (ws *WebServer) ListenAndServe() error {
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
