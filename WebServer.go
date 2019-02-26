@@ -42,6 +42,12 @@ func (ws *WebServer) HandleFunc(pattern string, handler func(w http.ResponseWrit
 
 }
 
+func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	ws.mux.ServeHTTP(w, r)
+
+}
+
 func (ws *WebServer) ListenAndServe() error {
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
@@ -73,7 +79,7 @@ func (ws *WebServer) RegisterController(ctrlPattern string, ctrlVer string, ctrl
 
 func (ws *WebServer) invokeCtrlMethod(ctrl BaseControllerInterface, w http.ResponseWriter, r *http.Request) {
 
-	urlElements := strings.Split(r.RequestURI, "/")
+	urlElements := strings.Split(r.URL.Path, "/")
 
 	numElements := len(urlElements)
 
