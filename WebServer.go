@@ -36,6 +36,17 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 }
 
+func (ws *WebServer) RegisterRoute(pattern string, path string) {
+
+	ws.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+
+		r.URL.Path = path
+		ws.mux.ServeHTTP(w, r)
+
+	})
+
+}
+
 func (ws *WebServer) HandleFunc(pattern string, handler func(w http.ResponseWriter, r *http.Request)) {
 
 	ws.mux.HandleFunc(pattern, handler)
