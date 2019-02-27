@@ -1,6 +1,7 @@
 package gows
 
 import (
+	"crypto/tls"
 	"errors"
 	"io"
 	"net/http"
@@ -50,6 +51,36 @@ func (ws *WebServer) RegisterRoute(pattern string, path string) {
 func (ws *WebServer) ListenAndServe() error {
 
 	err := http.ListenAndServe(ws.addrWithPort, ws.mux)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (ws *WebServer) ListenAndServeTLS(CertPath string, PrivateKeyPath string) error {
+
+	cfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+
+	srv := &http.Server{
+		Addr:         ws.addrWithPort,
+		Handler:      ws.mux,
+		TLSConfig:    cfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
+
+	err := srv.ListenAndServeTLS(CertPath, PrivateKeyPath)
 	if err != nil {
 		return err
 	}
