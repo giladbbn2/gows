@@ -5,8 +5,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"reflect"
-	"strings"
+	"net/http/httputil"
+	"net/url"
 )
 
 type WebServer struct {
@@ -37,13 +37,51 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 }
 
-func (ws *WebServer) RegisterRoute(pattern string, path string) {
+func (ws *WebServer) RegisterLocalRoute(pattern string, path string) {
 
 	ws.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 
 		r.URL.Path = path
 		ws.mux.ServeHTTP(w, r)
 
+	})
+
+}
+
+func (ws *WebServer) RegisterRemoteRoute(pattern string, remoteUrl string) {
+
+	target, _ := url.Parse(remoteUrl) //"http://localhost:9000/"
+
+	targetQuery := target.RawQuery
+
+	director := func(req *http.Request) {
+
+		req.URL.Scheme = "http"
+
+		req.URL.Host = target.Host
+
+		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
+
+		if targetQuery == "" || req.URL.RawQuery == "" {
+			req.URL.RawQuery = targetQuery + req.URL.RawQuery
+		} else {
+			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
+		}
+
+		if _, ok := req.Header["User-Agent"]; !ok {
+			// explicitly disable User-Agent so it's not set to default value
+			req.Header.Set("User-Agent", "")
+		}
+
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", target.Host)
+
+	}
+
+	proxy := &httputil.ReverseProxy{Director: director}
+
+	ws.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		proxy.ServeHTTP(w, r)
 	})
 
 }
@@ -99,46 +137,11 @@ func (ws *WebServer) RegisterController(ctrlPattern string, ctrlVer string, ctrl
 
 	ws.mux.HandleFunc("/ws/"+ctrlVer+"/"+ctrlPattern+"/", func(w http.ResponseWriter, r *http.Request) {
 
-		ws.invokeCtrlMethod(ctrl, w, r)
+		invokeCtrlMethod(ctrl, w, r)
 
 	})
 
 	return nil
-
-}
-
-func (ws *WebServer) invokeCtrlMethod(ctrl BaseControllerInterface, w http.ResponseWriter, r *http.Request) {
-
-	urlElements := strings.Split(r.URL.Path, "/")
-
-	numElements := len(urlElements)
-
-	var args []string
-
-	if numElements > 4 {
-		args = urlElements[5:]
-	} else if numElements == 4 {
-		args = make([]string, 0)
-	} else {
-		JSONError(w, errors.New("invalid number of params"))
-		return
-	}
-
-	methodName := strings.Title(urlElements[4])
-
-	ctrl.SetRequest(r)
-	ctrl.SetResponse(w)
-
-	method := reflect.ValueOf(ctrl).MethodByName(methodName)
-
-	if !method.IsValid() {
-		JSONError(w, errors.New("method not found"))
-		return
-	}
-
-	callable := method.Interface().(func([]string))
-
-	callable(args)
 
 }
 
