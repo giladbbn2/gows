@@ -69,7 +69,6 @@ func (ws *WebServer) RegisterRemoteRoute(pattern string, remoteUrl string) {
 		}
 
 		if _, ok := req.Header["User-Agent"]; !ok {
-			// explicitly disable User-Agent so it's not set to default value
 			req.Header.Set("User-Agent", "")
 		}
 
