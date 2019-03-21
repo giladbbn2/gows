@@ -3,15 +3,17 @@ package gows
 import (
 	"crypto/tls"
 	"errors"
-	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
+	"sync/atomic"
 )
 
 type WebServer struct {
-	mux          *http.ServeMux
-	addrWithPort string
+	mux               *http.ServeMux
+	addrWithPort      string
+	inProgressCounter int64
 }
 
 func NewWebServer(addrWithPort string) (*WebServer, error) {
@@ -22,16 +24,16 @@ func NewWebServer(addrWithPort string) (*WebServer, error) {
 
 	mux := http.NewServeMux()
 
-	fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
-	mux.Handle("/includes/", fs)
-
-	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "pong")
-	})
-
 	ws := new(WebServer)
 	ws.mux = mux
 	ws.addrWithPort = addrWithPort
+
+	fs := http.StripPrefix("/includes", http.FileServer(http.Dir("./includes")))
+	mux.Handle("/includes/", fs)
+
+	mux.HandleFunc("/gows/stats", func(w http.ResponseWriter, r *http.Request) {
+		JSON(w, `{"inProgressCounter":`+strconv.FormatInt(ws.GetInProgressCounter(), 10)+`}`)
+	})
 
 	return ws, nil
 
@@ -146,7 +148,11 @@ func (ws *WebServer) RegisterController(ctrlPattern string, ctrlVer string, ctrl
 
 	ws.mux.HandleFunc("/ws/"+ctrlVer+"/"+ctrlPattern+"/", func(w http.ResponseWriter, r *http.Request) {
 
+		atomic.AddInt64(&ws.inProgressCounter, 1)
+
 		invokeCtrlMethod(ctrl, w, r)
+
+		atomic.AddInt64(&ws.inProgressCounter, -1)
 
 	})
 
@@ -155,5 +161,13 @@ func (ws *WebServer) RegisterController(ctrlPattern string, ctrlVer string, ctrl
 }
 
 func (ws *WebServer) GetMicroServiceRootDir() string {
+
 	return microServiceRootDir
+
+}
+
+func (ws *WebServer) GetInProgressCounter() int64 {
+
+	return atomic.LoadInt64(&ws.inProgressCounter)
+
 }
