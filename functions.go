@@ -3,13 +3,16 @@ package gows
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/binary"
 	"errors"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -156,5 +159,68 @@ func Gunzip(b []byte) ([]byte, error) {
 	}
 
 	return b2, nil
+
+}
+
+func IP2Long(ip string) uint32 {
+
+	return binary.BigEndian.Uint32(net.ParseIP(ip)[12:16])
+
+}
+
+func Long2IP(ip int64) string {
+
+	b0 := strconv.FormatInt((ip>>24)&0xff, 10)
+	b1 := strconv.FormatInt((ip>>16)&0xff, 10)
+	b2 := strconv.FormatInt((ip>>8)&0xff, 10)
+	b3 := strconv.FormatInt((ip & 0xff), 10)
+
+	return b0 + "." + b1 + "." + b2 + "." + b3
+
+}
+
+func GetRemoteAddress(r *http.Request) (string, error) {
+
+	ips := r.Header.Get("X-Forwarded-For")
+	if ips != "" {
+		addresses := strings.Split(ips, ",")
+		for i := len(addresses) - 1; i >= 0; i-- {
+			ip := strings.TrimSpace(addresses[i])
+			realIP := net.ParseIP(ip)
+			if !realIP.IsGlobalUnicast() || IsIPInPrivateSubnet(ip) {
+				continue
+			}
+			return ip, nil
+		}
+	}
+
+	ips = r.Header.Get("X-Real-Ip")
+	if ips != "" {
+		addresses := strings.Split(ips, ",")
+		for i := len(addresses) - 1; i >= 0; i-- {
+			ip := strings.TrimSpace(addresses[i])
+			realIP := net.ParseIP(ip)
+			if !realIP.IsGlobalUnicast() || IsIPInPrivateSubnet(ip) {
+				continue
+			}
+			return ip, nil
+		}
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+
+	return ip, err
+
+}
+
+func IsIPInPrivateSubnet(ip string) bool {
+
+	ipLong := IP2Long(ip)
+
+	if (ipLong >= 167772160 && ipLong <= 184549375) || (ipLong >= 1681915904 && ipLong <= 1686110207) || (ipLong >= 2886729728 && ipLong <= 2887778303) || (ipLong >= 3221225472 && ipLong <= 3221225727) || (ipLong >= 3232235520 && ipLong <= 3232301055) || (ipLong >= 3323068416 && ipLong <= 3323199487) {
+		return true
+	}
+
+	return false
 
 }
